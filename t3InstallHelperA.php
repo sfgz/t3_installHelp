@@ -767,12 +767,6 @@ class user_install {
         $passwortIn = isset($this->req['passwort']) ? $this->req['passwort'] : '';
         $outtext = '<p><label for="code">Private $strDocupassword =</label> <input type="text" size="41" id="code" style="padding:4px;font-weight:bold;background:black;color:white;font-family:monospace;font-size:11pt;" value="' . sha1($passwortIn) . '" /> <i>Verschl&uuml;sselter hash</i></p>';
         $outtext .= '<p><label for="code">Kopieren und im Script einf&uuml;gen.</label> </p>';
-//         $protocoll = 'localhost' == $_SERVER['SERVER_NAME'] ? 'http://' : 'https://';
-//         $URL = $protocoll . $_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME'] . '' ;
-//         $frm = "\n<form action='".$URL."' id='".$this->Form['name']."' name='".$this->Form['name']."' enctype='multipart/form-data' method='post' enctype='multipart/form-data' method='post' accept-charset='".$this->Form['charset']."'> ";
-//         $frm .= $this->formHidden($this->req['aktion']);
-//         $frm .= '<input type="submit" name="chng" value="Wechseln"> zu Aktion ' . $this->req['aktion'];
-//         $frm .= "\n</form>";
         return $outtext;
     }
     
