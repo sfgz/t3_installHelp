@@ -18,7 +18,7 @@ class user_install {
     *
     * @var string
     */
-    Private $strVersion = '2.08a';
+    Private $strVersion = '2.09a';
 
     /**
     * Property strDocupassword
@@ -676,15 +676,19 @@ class user_install {
         $aFile = [];
         $aFilesInPath = $this->formFeldListZeigPfad( $this->Pfade['original'] );
         foreach( $aFilesInPath as $filename ){
-            if( is_dir( $this->Pfade['original'] .$filename) ){
-                $typ = 'ordner';
-                $filename .= '/';
+            if( is_link($this->Pfade['original'] .$filename) ){
+                $typ = 'link';
+                
             }elseif( $this->Pfade['original'] .$filename == __FILE__ ){
                 $typ = 'aktuell';
-            }elseif( is_link($this->Pfade['original'] .$filename) ){
-                $typ = 'link';
+                
+            }elseif( is_dir( $this->Pfade['original'] .$filename) ){
+                $typ = 'ordner';
+                $filename .= '/';
+                
             }else{
                 $typ = 'datei';
+                
             }
             $aFile[$typ=='ordner'?0:1][$filename] = $typ;
             if( strlen($filename) > $longest ) $longest = strlen($filename);
