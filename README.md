@@ -7,4 +7,4 @@ Zur Installation von Typo3 Anwendungen auf gehosteten Servern ohne SSH Zugriff. 
 ## optionale config Datei
 Die Datei t3InstallHelper_config.php wird beim Passwort ändern erstellt. 
 
-Die private Konfigurationsdatei der Schule befindet sich auf https://1password.com
+Die private Konfigurationsdatei der Schule befindet sich unter https://1password.com
