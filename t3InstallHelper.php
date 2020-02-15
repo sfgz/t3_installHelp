@@ -3,7 +3,7 @@
 /** 
 * Class t3InstallHelper
 * 
-* @date      14.02.2020
+* @date      15.02.2020
 * @copyright MIT License 
 * @author    Daniel Rueegg Winterthur CH
 * 
@@ -18,7 +18,7 @@ class t3InstallHelper {
     *
     * @var string
     */
-    Public $strVersion = '2.11';
+    Public $strVersion = '2.13';
 
     /**
     * Property strDocupassword
@@ -184,7 +184,7 @@ class t3InstallHelper {
     *
     * @var string
     */
-    Private $configFileName = 't3InstallHelper.ini';
+    Private $configFileName = 't3InstallHelper_config.php';
     
     /**
      * main
@@ -197,14 +197,19 @@ class t3InstallHelper {
     
         $this->setUpVariales();
         
+        // if ok was clicked then run data-Action
+        if( isset($_POST['ok']) ){
+                $actionResult = $this->runAction();
+        }
+
         // create the input form part of html document
         $bodyOut = $this->htmFormular();
-        
-        // if ok was clicked then run data-Action, wrap it as html div and append to form.
-        if( isset($_POST['ok']) ){
-                $bodyOut .= $this->runAction();
+
+        // if ok was clicked then append result from data-Action, wrap it as html div and append to form.
+        if( isset($actionResult) ){
+                $bodyOut .= $actionResult;
         }
-        
+
         // output header , form, runAction()-result and footer
         $htmlOut = $this->wrapAsHtml($bodyOut);
         
@@ -260,15 +265,18 @@ class t3InstallHelper {
             'pwd'    => ['tiptext'],
             'subdomains' => ['standardwert'],
         ];
-        $strDocument  = '$this->strDocupassword = ' . "'" . $this->strDocupassword . "';\n";
-        $strDocument  = "\n\n## preauth\n";
+        $strDocument = '## password for this script. For a blank char like " " set the value b858cb282617fb0956d960215c8e84d1ccf909c6' . "\n";
+        $strDocument .= '$this->strDocupassword = ' . "'" . $this->strDocupassword . "';\n";
+        $strDocument .= "\n## preauth\n";
         $strDocument .= '$this->strSecretPreauthKey = ' . "'" . $this->strSecretPreauthKey . "';\n";
         $strDocument .= '$this->strAuthSeparer = ' . "'" . $this->strAuthSeparer . "';\n";
         
-        $strDocument  = "\n\n## own settings\n";
+        $strDocument .= '$this->aIngredients = [];' . "\n";
         foreach( $this->aIngredients as $fieldname => $content ){
             $strDocument .= '$this->aIngredients'."['" . $fieldname . "'] = '" . $content . "';\n";
         }
+        
+        $strDocument .= "\n## own settings\n";
         
         foreach( $aFieldsToStore as $fieldname => $aTypen){
             foreach( $aTypen as $typ){
@@ -350,7 +358,7 @@ class t3InstallHelper {
             // display login formular
                 $formularBody = $this->formFeldRow('pwd');
                 $formularBody .= "\n<tr>\n<td colspan='2'>";
-                if( $isLoggedIn < 0 ) $formularBody.= '<label for="pwd">Passwort falsch! </label>';
+                if( $isLoggedIn < 0 && !isset($_POST['ok']) ) $formularBody.= '<label for="pwd">Passwort falsch! </label>';
                 $formularBody.= "\n</td>\n</tr>";
                 $formularBody.= "\n<tr><td></td><td><input type='submit' name='login' value='Login'></td></tr>";
 
@@ -732,8 +740,8 @@ class t3InstallHelper {
                     'command' => 'Ziel f&uuml;r Symlink oder zum entpacken'
                 ], 
                 'aktuell' => [ 
-                    'style' => 'font-style:italic;' ,            
-                    'command' => '' 
+                    'style' => 'color:#aaa;' ,            
+                    'command' => 'laufendes Skript oder Konfigurationsdatei' 
                 ], 
                 'link'    => [ 
                     'style' => 'color:#eb0;' ,                   
@@ -749,14 +757,14 @@ class t3InstallHelper {
                 ]
         ];
         
-        $longest = 0;
+        $iLongestFilename = 0;
         $aFile = [];
         $aFilesInPath = $this->formFeldListZeigPfad( $this->Pfade['original'] );
         foreach( $aFilesInPath as $filename ){
             if( is_link($this->Pfade['original'] .$filename) ){
                 $typ = 'link';
                 
-            }elseif( pathinfo( $this->Pfade['original'] . $filename , PATHINFO_FILENAME ) == pathinfo(  __FILE__ ,  PATHINFO_FILENAME ) ){
+            }elseif( $this->Pfade['original'] . $filename == __FILE__ || $filename == $this->configFileName ){
                 $typ = 'aktuell';
                 
             }elseif( is_dir( $this->Pfade['original'] . $filename ) ){
@@ -768,23 +776,27 @@ class t3InstallHelper {
                 
             }
             $aFile[$typ=='ordner'?0:1][$filename] = $typ;
-            if( strlen($filename) > $longest ) $longest = strlen($filename);
+            if( strlen($filename) > $iLongestFilename ) $iLongestFilename = strlen($filename);
         }
         // add 3 points as offset, sort to set order for dir and file
-        $longest +=3;
+        $iLongestFilename +=3;
         ksort($aFile);
         
         $fileInfo = '<div style="padding:3px;font-size:11pt;font-family: courier,monospace;background:black;color:#e0e0e0;">';
         $fileInfo .= '<i>Dateien in diesem Pfad, [typ] und <span style="' . $aOptions['aktion']['style'] . '">Aktionen, die mit diesem Script ausgef&uuml;hrt werden k&ouml;nnen:</span> </i>';
         $fileInfo .= '<p style="padding:3px;font-family: courier,monospace;background:black;">';
         
+        $iLongestType = 0;
+        foreach( $aFile as $srt => $aSrtFile ) {
+                foreach( $aSrtFile as $file => $typ ) { if( strlen($typ) > $iLongestType ) $iLongestType = strlen($typ); }
+        }
         foreach( $aFile as $srt => $aSrtFile ) { 
             if( is_array($aSrtFile) ) ksort($aSrtFile);
             foreach( $aSrtFile as $file => $typ ) { 
                     $mim = pathinfo( $file , PATHINFO_EXTENSION ) ;
                     $aOptions['datei']['command'] = isset($this->mim[$mim]['cmd']) ? 'Datei entpacken mit &raquo;' . $this->mim[$mim]['cmd'] . '&laquo;' : '';
-                    $strHintOffset = strlen('aktuell') - strlen($typ) ;
-                    $strTabOffset = $longest - strlen( $file );
+                    $strHintOffset = $iLongestType > strlen($typ) ? $iLongestType+1 - strlen($typ) : 1;
+                    $strTabOffset = $iLongestFilename - strlen( $file );
                     $fileInfo .= '<span style="'; 
                     $fileInfo .= $aOptions[$typ]['style']; 
                     if($aOptions[$typ]['command']) $fileInfo .= 'font-weight:bold;'; 
@@ -792,7 +804,10 @@ class t3InstallHelper {
                     $fileInfo .= $file; 
                     if( $strTabOffset ) $fileInfo .= str_repeat( '.' , $strTabOffset ); 
                     $fileInfo .= '['. trim( ucFirst($typ) ) . ']</span>'; 
-                    if($aOptions[$typ]['command'] && $strHintOffset ) $fileInfo .= ' <span style="' . $aOptions['aktion']['style'] . '"> ' . str_repeat( '&nbsp;' , $strHintOffset ) . $aOptions[$typ]['command'] . '</span>'; 
+                    if($aOptions[$typ]['command'] ) {
+                        $charsOffset = str_repeat( '&nbsp;' , $strHintOffset );
+                        $fileInfo .= '<span style="' . $aOptions['aktion']['style'] . '">' . $charsOffset . $aOptions[$typ]['command'] . '</span>'; 
+                    }
                     $fileInfo .= '<br />';
             }
         }
@@ -854,11 +869,11 @@ class t3InstallHelper {
             
             if( $this->strDocupassword == $newPasswordHash ){
                 $outtext = ' <p>Passwort bleibt gleich.</p>';
+                
             }elseif( $this->loginTest() ){
                 $this->strDocupassword = $newPasswordHash;
                 $this->writeConfig();
-                $outtext .= '<p>OK, das Passwort wurde ge&auml;ndert. Bitte abmelden: ';
-                $outtext .= '<a href="'. ('localhost' == $_SERVER['SERVER_NAME'] ? 'http://' : 'https://') . $_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME']. '">Logout</a> </p>' . "\n";
+                $outtext .= '<p>OK, das Passwort wurde ge&auml;ndert.';
             }
             
         }
