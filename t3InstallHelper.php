@@ -19,6 +19,13 @@ class t3InstallHelper {
     * @var string
     */
     Public $strVersion = '2.13';
+    
+    /**
+    * Property configFileName
+    *
+    * @var string
+    */
+    Private $configFileName = 't3InstallHelper_config.php';
 
     /**
     * Property strDocupassword
@@ -178,13 +185,6 @@ class t3InstallHelper {
     * @var array
     */
     Private $Pfade = ['original'=>'','basis'=>''];
-    
-    /**
-    * Property configFileName
-    *
-    * @var string
-    */
-    Private $configFileName = 't3InstallHelper_config.php';
     
     /**
      * main
