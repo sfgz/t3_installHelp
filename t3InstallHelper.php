@@ -3,7 +3,7 @@
 /** 
 * Class t3InstallHelper
 * 
-* @date      15.02.2020
+* @date      23.02.2020
 * @copyright MIT License 
 * @author    Daniel Rueegg Winterthur CH
 * 
@@ -18,14 +18,7 @@ class t3InstallHelper {
     *
     * @var string
     */
-    Public $strVersion = '2.13';
-    
-    /**
-    * Property configFileName
-    *
-    * @var string
-    */
-    Private $configFileName = 't3InstallHelper_config.php';
+    Public $strVersion = '2.17';
 
     /**
     * Property strDocupassword
@@ -146,12 +139,12 @@ class t3InstallHelper {
     * @var array
     */
     Private $Aktionen = [
-        'u'=>[ 'titel'=>'Typo3-Datei entpacken',  'felder'=>'pwd,original,subpfad',    'script' => 'actUnzip' ] , 
-        'l'=>[ 'titel'=>'Symlink erzeugen',       'felder'=>'pwd,linkdatei,symlink',   'script' => 'actLink' ] ,
-        'd'=>[ 'titel'=>'Symlink l&ouml;schen',   'felder'=>'pwd,symlink',             'script' => 'actDeletelink' ] , 
-        'f'=>[ 'titel'=>'Dateiliste',             'felder'=>'pwd,fileinfotext',        'script' => 'actFileInfo' ] , 
-        'a'=>[ 'titel'=>'Preauth Links anzeigen', 'felder'=>'pwd,username,subdomains', 'script' => 'actPreauth' ] ,
-        'p'=>[ 'titel'=>'Passwort &auml;ndern',          'felder'=>'pwd,passwort,passinfo',   'script' => 'actPassword' ]
+        'u'=>[ 'titel'=>'Typo3-Datei entpacken',  'felder'=>'pwd,original,subpfad',    'script' => 'actUnzip' ,      'autorun' => 0 ] , 
+        'l'=>[ 'titel'=>'Symlink erzeugen',       'felder'=>'pwd,linkdatei,symlink',   'script' => 'actLink' ,       'autorun' => 0 ] ,
+        'd'=>[ 'titel'=>'Symlink l&ouml;schen',   'felder'=>'pwd,symlink',             'script' => 'actDeletelink' , 'autorun' => 0 ] , 
+        'f'=>[ 'titel'=>'Dateiliste',             'felder'=>'pwd,fileinfotext',        'script' => 'actFileInfo' ,   'autorun' => 1 ] , 
+        'a'=>[ 'titel'=>'Preauth Links anzeigen', 'felder'=>'pwd,username,subdomains', 'script' => 'actPreauth' ,    'autorun' => 0 ] ,
+        'p'=>[ 'titel'=>'Passwort &auml;ndern',   'felder'=>'pwd,passwort,passinfo',   'script' => 'actPassword' ,   'autorun' => 0 ]
     ];
 
     /**
@@ -171,6 +164,13 @@ class t3InstallHelper {
     * @var array
     */
     Private $Form = ['charset'=>'ISO-8859-1','name'=>'installform'];
+
+    /**
+    * Property backlink
+    *
+    * @var string
+    */
+    Private $backlink = '<p>&larr; <a href="/">zu Server Root</a></p>';
     
     /**
     * Property req
@@ -187,6 +187,13 @@ class t3InstallHelper {
     Private $Pfade = ['original'=>'','basis'=>''];
     
     /**
+    * Property configFileName
+    *
+    * @var string
+    */
+    Private $configFileName = 't3InstallHelper_config.php';
+    
+    /**
      * main
      *   initiate script
      *   returns string with final HTML code
@@ -198,7 +205,7 @@ class t3InstallHelper {
         $this->setUpVariales();
         
         // if ok was clicked then run data-Action
-        if( isset($_POST['ok']) ){
+        if( isset($_POST['ok']) || $this->Aktionen[$this->req['aktion']]['autorun'] ){
                 $actionResult = $this->runAction();
         }
 
@@ -270,6 +277,7 @@ class t3InstallHelper {
         $strDocument .= "\n## preauth\n";
         $strDocument .= '$this->strSecretPreauthKey = ' . "'" . $this->strSecretPreauthKey . "';\n";
         $strDocument .= '$this->strAuthSeparer = ' . "'" . $this->strAuthSeparer . "';\n";
+        $strDocument .= '$this->backlink = ' . "'" . $this->backlink . "';\n";
         
         $strDocument .= '$this->aIngredients = [];' . "\n";
         foreach( $this->aIngredients as $fieldname => $content ){
@@ -323,7 +331,7 @@ class t3InstallHelper {
         }
         $body.= "        </h2>\n";
 
-        if( $loginTest <= 0 ) $body.= '<p>&larr; <a href="/">zur&uuml;ck</a></p>' . "\n";
+        if( $loginTest <= 0 ) $body.= $this->backlink . "\n";
 
         $body.= "\n" . $content . "\n";
         
@@ -377,7 +385,7 @@ class t3InstallHelper {
                 foreach( $felder as $fld){
                     $formularBody.=$this->formFeldRow($fld);
                 }
-                $formularBody.="\n<tr><td></td><td><input type='submit' name='ok' value='Ok'></td></tr>";
+                if( !$this->Aktionen[ $this->req['aktion'] ]['autorun'] ) $formularBody.="\n<tr><td></td><td><input type='submit' name='ok' value='Ok'></td></tr>";
 
         }
         $formularEnde = $this->formHidden($this->req['aktion']);
@@ -594,7 +602,7 @@ class t3InstallHelper {
             }
         }
         
-        if($this->req['lastaction'] == $this->req['aktion'] ){
+        if($this->req['lastaction'] == $this->req['aktion']  || $this->Aktionen[$this->req['aktion']]['autorun']){
             $bodyOut = "\n" . "\n" . '<div style="border-top:thin solid #ccc; padding:10px 0 0 0;margin:10px 0 0 0;" >';
             $bodyOut .= "\n" . "\n" . $content;
             $bodyOut .= "\n" . "\n" . '</div>' . "\n";
@@ -661,6 +669,8 @@ class t3InstallHelper {
         if( count($aLink) > 1 ){ 
                 $relatedOrignPath =  str_repeat( '../' , count($aLink)-1 ) . $this->req['linkdatei'];
         }
+        // then rename the symlink to his basename
+        $basenameLink = array_pop( $aLink );
         
         $aShrinkBase = explode( '/' , trim( dirname(__FILE__) , '/' ) );
         
@@ -697,7 +707,8 @@ class t3InstallHelper {
             return ". Fehler: Datei existiert (".filetype($tempBaseDir.$link)."): ".$tempBaseDir.$link."";
         }
         
-        symlink( $relatedOrignPath ,  $link);
+        chdir( dirname($tempBaseDir.$link) );
+        symlink( $relatedOrignPath ,  $basenameLink);
         // also possible by exec:
         // exec( 'ln -s ' . $this->req['linkdatei'] . ' ' . $link );
         return ". ok, gelinkt: ".$tempBaseDir.$link." <br />-> Verweist auf: ".$relatedOrignPath."";
@@ -783,7 +794,11 @@ class t3InstallHelper {
         ksort($aFile);
         
         $fileInfo = '<div style="padding:3px;font-size:11pt;font-family: courier,monospace;background:black;color:#e0e0e0;">';
-        $fileInfo .= '<i>Dateien in diesem Pfad, [typ] und <span style="' . $aOptions['aktion']['style'] . '">Aktionen, die mit diesem Script ausgef&uuml;hrt werden k&ouml;nnen:</span> </i>';
+        $fileInfo .= '<i>Dateien in diesem Pfad, [typ] und ';
+        $fileInfo .= '<span style="' . $aOptions['aktion']['style'] . '">';
+        $fileInfo .= 'Aktionen, die mit diesem Script ausgef&uuml;hrt werden k&ouml;nnen:';
+        $fileInfo .= '</span> ';
+        $fileInfo .= '</i>';
         $fileInfo .= '<p style="padding:3px;font-family: courier,monospace;background:black;">';
         
         $iLongestType = 0;
@@ -812,7 +827,7 @@ class t3InstallHelper {
             }
         }
         $fileInfo .= '</p>';
-        $fileInfo .= '<i>Total '. count($aFile[0]) . ' Ordner und '. count($aFile[1]) . ' Dateien.</i>';
+        $fileInfo .= '<i>Total '. ( isset($aFile[0]) ? count($aFile[0]) : 0 ) . ' Ordner und '. ( isset($aFile[1]) ? count($aFile[1]) : 0 ) . ' Dateien.</i>';
         $fileInfo .= '</div>';
         return $fileInfo;
     }
