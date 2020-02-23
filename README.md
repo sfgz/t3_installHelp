@@ -1,4 +1,4 @@
-# t3_installHelp
+# t3_installHelp 2.17
 Standalone app to unpack and link typo3 Files
 To install Typo3 without SSH-Acces like  on hosted Servers. FTP-Access remains mandatory
 
