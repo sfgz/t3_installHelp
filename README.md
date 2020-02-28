@@ -4,7 +4,7 @@ To install Typo3 without SSH-Acces like  on hosted Servers. FTP-Access remains m
 
 Zur Installation von Typo3 Anwendungen auf gehosteten Servern ohne SSH Zugriff. FTP-Zugriff ist nötig.
 
-##Installation
+## Installation
 Script in ein erreichbares www Verzeichnis kopieren und starten.
 
 ## optionale config Datei
