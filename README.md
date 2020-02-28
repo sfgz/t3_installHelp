@@ -10,4 +10,4 @@ Script in ein erreichbares www Verzeichnis kopieren und starten.
 ## optionale config Datei
 Die Datei t3InstallHelper_config.php wird beim Passwort ändern erstellt. 
 
-Die private Konfigurationsdatei der Schule befindet sich unter https://1password.com
+Konfigurationsdateien können beispielsweise unter https://1password.com gespeichert werden.
