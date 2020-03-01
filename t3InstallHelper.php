@@ -899,7 +899,7 @@ class t3InstallHelper {
     
 }
 
-error_reporting(-1);
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 $frm = new t3InstallHelper();
 echo $frm->main();
