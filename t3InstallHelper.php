@@ -359,7 +359,7 @@ class t3InstallHelper {
                             border:2px solid #000;
                             border-color:#ddd #bbb #000 #777;
                             }\n";
-        $header.= "        .linkButton:hover { background:#999; border-color:#000 #777 #ddd #bbb; }\n";
+        $header.= "        .linkButton:hover { background:#999; color:#fff; border-color:#000 #777 #ddd #bbb; }\n";
         $header.= "    </style>\n";
         $header.= "  </head>\n";
         
