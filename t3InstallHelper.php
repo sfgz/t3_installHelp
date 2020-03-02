@@ -3,7 +3,7 @@
 /** 
 * Class t3InstallHelper
 * 
-* @date      23.02.2020
+* @date      02.03.2020
 * @copyright MIT License 
 * @author    Daniel Rueegg Winterthur CH
 * 
@@ -18,7 +18,14 @@ class t3InstallHelper {
     *
     * @var string
     */
-    Public $strVersion = '2.17';
+    Public $strVersion = '2.18';
+
+    /**
+    * Property backlink
+    *
+    * @var string
+    */
+    Private $backlink = ''; // '<p>&uarr; <a href="/">zum Server</a></p>';
 
     /**
     * Property strDocupassword
@@ -30,7 +37,7 @@ class t3InstallHelper {
     *
     * @var string
     */
-    Private $strDocupassword = 'b858cb282617fb0956d960215c8e84d1ccf909c6';// blank (1 char)
+    Private $strDocupassword = 'b858cb282617fb0956d960215c8e84d1ccf909c6';// blank char like " " (1 char)
 
     /**
     * Property strSecretPreauthKey
@@ -59,8 +66,8 @@ class t3InstallHelper {
                 'school'    => 'shortSchoolname',
                 'role'      => 'student',
                 'timestamp' => 0,
-                'account'   => 'vorname.nachname',
-                'preauth'   => 'getGenerated',
+                'account'   => 'wird-generiert',
+                'preauth'   => 'wird-generiert',
             ];
 
     /**
@@ -73,7 +80,7 @@ class t3InstallHelper {
                         'typ'          => 'select' ,   
                         'lab'          => 'Aktion' ,            
                         'listen'       => 'aktList' , 
-                        'standardwert' => 'l'
+                        'standardwert' => 'p'
                         ],
         'subdomains'=> [
                         'typ'          => 'text' ,   
@@ -130,7 +137,47 @@ class t3InstallHelper {
                         'typ'  => 'label' , 
                         'lab'  => '' , 
                         'text' => ''
-                        ]
+                        ],
+        'preHint' => [
+                        'typ'  => 'label' , 
+                        'lab'  => 'Reihenfolge' , 
+                        'text' => 'Die 4 Felder school, role, timestamp und account in richtiger Reihenfolge speichern.'
+                        ],
+        'spacer' => [
+                        'typ'  => 'label' , 
+                        'lab'  => '' ,
+                        'text' => '<hr>'
+                        ],
+        'preSeparer' => [
+                        'typ'  => 'text' , 
+                        'lab'  => 'Trennzeichen' , 
+                        'standardwert' => '-',
+                        'tiptext' => ' Mit diesem Zeichen werden die Parameter verbunden.'
+                        ],
+        'preSecretKey' => [
+                        'typ'  => 'text' , 
+                        'lab'  => 'Secret Key' , 
+                        'standardwert' => 'abcd1234',
+                        'tiptext' => ' Der geheime Schluessel von Intranet Sek II..'
+                        ],
+        'preOrderlist' => [
+                        'typ'  => 'text' , 
+                        'lab'  => 'Reihenfolge' , 
+                        'standardwert' => 'school,role,timestamp,account ',
+                        'tiptext' => ' school, role, timestamp und account.'
+                        ],
+        'preScoolname' => [
+                        'typ'  => 'text' , 
+                        'lab'  => 'school' , 
+                        'standardwert' => 'zB. myScl',
+                        'tiptext' => ''
+                        ],
+        'preRolename' => [
+                        'typ'  => 'text' , 
+                        'lab'  => 'role' , 
+                        'standardwert' => 'student',
+                        'tiptext' => ''
+                        ],
     ];
 
     /**
@@ -140,12 +187,21 @@ class t3InstallHelper {
     */
     Private $Aktionen = [
         'u'=>[ 'titel'=>'Typo3-Datei entpacken',  'felder'=>'pwd,original,subpfad',    'script' => 'actUnzip' ,      'autorun' => 0 ] , 
-        'l'=>[ 'titel'=>'Symlink erzeugen',       'felder'=>'pwd,linkdatei,symlink',   'script' => 'actLink' ,       'autorun' => 0 ] ,
+        'l'=>[ 'titel'=>'Symlink erstellen',      'felder'=>'pwd,linkdatei,symlink',   'script' => 'actLink' ,       'autorun' => 0 ] ,
         'd'=>[ 'titel'=>'Symlink l&ouml;schen',   'felder'=>'pwd,symlink',             'script' => 'actDeletelink' , 'autorun' => 0 ] , 
+        'a'=>[ 'titel'=>'Preauth Links anzeigen', 'felder'=>'pwd,username,subdomains,preSecretKey,preHint,preOrderlist,preScoolname,preRolename,preSeparer', 'script' => 'actPreauth' ,    'autorun' => 0 ] ,
+        'p'=>[ 'titel'=>'Passwort &auml;ndern',   'felder'=>'pwd,passwort,passinfo',   'script' => 'actPassword' ,   'autorun' => 0 ] ,
         'f'=>[ 'titel'=>'Dateiliste',             'felder'=>'pwd,fileinfotext',        'script' => 'actFileInfo' ,   'autorun' => 1 ] , 
-        'a'=>[ 'titel'=>'Preauth Links anzeigen', 'felder'=>'pwd,username,subdomains', 'script' => 'actPreauth' ,    'autorun' => 0 ] ,
-        'p'=>[ 'titel'=>'Passwort &auml;ndern',   'felder'=>'pwd,passwort,passinfo',   'script' => 'actPassword' ,   'autorun' => 0 ]
     ];
+
+/*
+        'c'=>[ 
+                'titel'=>'Preauth Links konfigurieren',         
+                'felder'=>'pwd,preSecretKey,spacer,preHint,preOrderlist,preScoolname,preRolename,preSeparer',
+                'script' => 'actPreauthConfig' , 
+                'autorun' => 0
+        ] ,
+*/
 
     /**
     * Property mim
@@ -164,13 +220,13 @@ class t3InstallHelper {
     * @var array
     */
     Private $Form = ['charset'=>'ISO-8859-1','name'=>'installform'];
-
+    
     /**
-    * Property backlink
+    * Property configFileName
     *
     * @var string
     */
-    Private $backlink = '<p>&larr; <a href="/">zu Server Root</a></p>';
+    Private $configFileName = 't3InstallHelper_config.php';
     
     /**
     * Property req
@@ -187,13 +243,6 @@ class t3InstallHelper {
     Private $Pfade = ['original'=>'','basis'=>''];
     
     /**
-    * Property configFileName
-    *
-    * @var string
-    */
-    Private $configFileName = 't3InstallHelper_config.php';
-    
-    /**
      * main
      *   initiate script
      *   returns string with final HTML code
@@ -201,12 +250,18 @@ class t3InstallHelper {
      * @return string
      */
     Public function main(){
+        
+        $this->origConfig = [ 'Felder' => $this->Felder , 'aIngredients' =>  $this->aIngredients ];
+        
+        $this->runActionHook( 'beforeSetupUpVarialesHook' );
     
         $this->setUpVariales();
         
+        $this->runActionHook( 'beforeDisplayHook' );
+
         // if ok was clicked then run data-Action
         if( isset($_POST['ok']) || $this->Aktionen[$this->req['aktion']]['autorun'] ){
-                $actionResult = $this->runAction();
+                if( $this->loginTest() > 0 ) $actionResult = $this->runAction();
         }
 
         // create the input form part of html document
@@ -238,15 +293,17 @@ class t3InstallHelper {
         if( file_exists($this->configFileName) ) include_once($this->configFileName);
 
         // get incomed values
+        $sr = [ '""' => '' , "''" => "" , '"' => '' , "'" => "" ];
         foreach(array_keys($this->Felder) as $inVar){
                 if(!empty($_REQUEST[$inVar])){
-                    $this->req[$inVar] = $_REQUEST[$inVar];
+                    $this->req[$inVar] = str_replace( array_keys($sr) , $sr , $_REQUEST[$inVar] );
                 }
         }
-        
         // set default values
         if(!isset($this->req['aktion'])){
             $this->req['aktion'] = $this->Felder['aktion']['standardwert'];
+        }else{
+            $this->Felder['aktion']['standardwert'] = $this->req['aktion'];
         }
         
         //  add last action or default value
@@ -255,6 +312,7 @@ class t3InstallHelper {
         }else{
             $this->req['lastaction'] = $this->req['aktion'];
         }
+        
         return true;
     }
     
@@ -265,34 +323,30 @@ class t3InstallHelper {
      */
     Private function writeConfig(){
         
-        $aFieldsToStore = [
-            'aktion'     => ['standardwert'],
-            'subdomains' => ['standardwert'],
-            'linkdatei'  => ['standardwert','tiptext'],
-            'pwd'    => ['tiptext'],
-            'subdomains' => ['standardwert'],
-        ];
         $strDocument = '## password for this script. For a blank char like " " set the value b858cb282617fb0956d960215c8e84d1ccf909c6' . "\n";
         $strDocument .= '$this->strDocupassword = ' . "'" . $this->strDocupassword . "';\n";
-        $strDocument .= "\n## preauth\n";
+        $strDocument .= "\n## preauth secret ingredients\n";
         $strDocument .= '$this->strSecretPreauthKey = ' . "'" . $this->strSecretPreauthKey . "';\n";
         $strDocument .= '$this->strAuthSeparer = ' . "'" . $this->strAuthSeparer . "';\n";
-        $strDocument .= '$this->backlink = ' . "'" . $this->backlink . "';\n";
+//         $strDocument .= '$this->backlink = ' . "'" . $this->backlink . "';\n";
         
         $strDocument .= '$this->aIngredients = [];' . "\n";
         foreach( $this->aIngredients as $fieldname => $content ){
-            $strDocument .= '$this->aIngredients'."['" . $fieldname . "'] = '" . $content . "';\n";
+//             if( $this->origConfig['aIngredients'][$fieldname] == $content ) continue;
+            $strDocument .= '$this->aIngredients'."['" . $fieldname . "'] = '" . ( $fieldname=='timestamp' || $fieldname =='preauth' ? '' : $content ) . "';\n";
         }
         
-        $strDocument .= "\n## own settings\n";
+        $strDocument .= "\n## own default values for fields and labels\n";
         
-        foreach( $aFieldsToStore as $fieldname => $aTypen){
-            foreach( $aTypen as $typ){
-                $strDocument .= '$this->Felder'."['" . $fieldname . "']['" . $typ . "'] = '" . $this->Felder[$fieldname][$typ] . "';\n";
-            }
+        $aFieldsToStore = explode( ',' , 'username,subdomains,aktion' );
+        foreach( $aFieldsToStore as $fieldname ){ 
+            if( !isset($this->Felder[$fieldname]['standardwert']) || $this->origConfig['Felder'][$fieldname]['standardwert'] == $this->Felder[$fieldname]['standardwert'] ) continue;
+            $strDocument .= '$this->Felder'."['" . $fieldname . "']['standardwert'] = '" . $this->Felder[$fieldname]['standardwert'] . "';\n";
         }
+        $strDocument .= '$this->Felder'."['pwd']['tiptext'] = '" . $this->Felder['pwd']['tiptext'] . "';\n";
         
         file_put_contents( $this->configFileName , "<?PHP\n" . $strDocument . "?>" );
+        return true;;
     }
     
     /**
@@ -306,37 +360,55 @@ class t3InstallHelper {
         $loginTest = $this->loginTest();
         $tit = $loginTest > 0 ? 't3installHelp | ' . $this->Aktionen[$this->req['aktion']]['titel']: 'Login to t3 Install Helper';
         
-        $header = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\n  \"http://www.w3.org/TR/html4/loose.dtd\">";
-        $header.= "<html><head><title>".$tit."</title></head>";
+        $widthMax = '1300px';
+        $widthMin = '570px';
+        
+        $header = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
+        $header.= "\n<html>\n";
+        $header.= "  <head>\n";
+        $header.= "    <meta charset=\"utf-8\">\n";
+        $header.= "    <title>".$tit."</title>\n";
+        $header.= "    <style>\n";
+        $header.= "        .centerWrapper {margin:10px auto;max-width:$widthMax;}\n";
+        $header.= "        .innerFrame {min-width:$widthMin;max-width:$widthMax;border:1px solid #AAA;border-radius:6px;margin:20px 5px; background:#e9edef; padding:10px 8px;}\n";
+        $header.= "        .pageTitle {margin:0 0 10px 0;padding: 0 0 5px 0; border-bottom:thin solid #aaa;}\n";
+        $header.= "        .pageMainTitle {font-variant-caps: small-caps;}\n";
+        $header.= "        .pageSlimTitle {font-size:75%;font-weight:normal;}\n";
+        $header.= "        .pageSmallTitle {font-size:50%;font-weight:normal;}\n";
+        $header.= "        .actionAnswer {border-top:thin solid #ccc; padding:10px 0 0 0;margin:10px 0 0 0;}\n";
+        $header.= "        .actionAnswer .attention {background:#FF0;padding:3px;margin-right:3px;border-radius:3px;border:thin solid #555;}\n";
+        $header.= "        .footerLine {border-top:1px solid #aaa;font-size:80%;padding:10px 0 0 0;margin:15px 0 0 0;font-style:italic;;font-weight:normal;}\n";
+        $header.= "    </style>\n";
+        $header.= "  </head>\n";
         
         $protocoll = 'localhost' == $_SERVER['SERVER_NAME'] ? 'http://' : 'https://';
         $URL = $protocoll . $_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME'];
         
-        $body = '  <body>' . "\n";
-        $body.= '    <div style="margin:10px auto;max-width:1150px;">' . "\n";
-        $body.= '      <div style="min-width:570px;max-width:1150px;border:1px solid #AAA;border-radius:6px;margin:20px 5px; background:#e9edef; padding:10px 8px;">' . "\n";
-        $body.= '        <h2 style="margin:0 0 10px 0;padding: 0 0 5px 0; border-bottom:thin solid #aaa;">' . "\n";
-        $body.= '          <span style="font-variant-caps: small-caps;">t3 Install Helper</span>' . "\n";
-        $body.= '          <span style="font-size:75%;font-weight:normal;">v' . $this->strVersion . '</span>' . "\n";
-        $body.= '          <span style="font-size:50%;font-weight:normal;"> &copy;' . date('Y') . ' MIT Daniel R&uuml;egg</span>' . "\n";
+        $body = '  <body>' . "\n\n";
+        $body.= '    <div class="centerWrapper">' . "\n";
+        $body.= '      <div class="innerFrame">' . "\n";
+        $body.= '        <h2 class="pageTitle">' . "\n";
+        $body.= '          <span class="pageMainTitle">t3 Install Helper</span>' . "\n";
+        $body.= '          <span class="pageSlimTitle">v' . $this->strVersion . '</span>' . "\n";
+        $body.= '          <span class="pageSmallTitle"> &copy;' . date('Y') . ' MIT Daniel R&uuml;egg</span>' . "\n";
         
         if( $loginTest > 0 ) {
-                $body.= '          <span style="font-size:75%;font-weight:normal;"><a href="'. $URL. '">Logout</a></span>' . "\n";
-                $body.= '          <p style="font-size:50%;font-weight:normal;padding:0;margin:5px 0;">' . "\n";
+                $body.= '          <span class="pageSlimTitle"><a href="'. $URL. '">Logout</a></span>' . "\n";
+                $body.= '          <p class="pageSmallTitle" style="padding:0;margin:5px 0;">' . "\n";
                 $body.= '          Diese Datei';
                 $body.= ' &raquo;' . pathinfo( __FILE__ , PATHINFO_BASENAME). '&laquo;';
                 $body.= ' nach Gebrauch vom Webspace entfernen!';
                 $body.= ' Standort: ' . dirname( __FILE__ ) . '/';
                 $body.= '</p>' . "\n";
         }
-        $body.= "        </h2>\n";
+        $body.= "        </h2>";
 
         if( $loginTest <= 0 ) $body.= $this->backlink . "\n";
 
         $body.= "\n" . $content . "\n";
         
         if( $loginTest > 0 ) {
-                $body.= '<p style="border-top:1px solid #aaa;font-size:80%;padding:10px 0 0 0;margin:15px 0 0 0;font-style:italic;;font-weight:normal;">';
+                $body.= '        <p class="footerLine">';
                 $body.= ' Built to set up Typo3 installations on hosted servers without ssh-access';
                 $body.= '</p>' . "\n";
         }
@@ -367,31 +439,32 @@ class t3InstallHelper {
                 $formularBody = $this->formFeldRow('pwd');
                 $formularBody .= "\n<tr>\n<td colspan='2'>";
                 if( $isLoggedIn < 0 && !isset($_POST['ok']) ) $formularBody.= '<label for="pwd">Passwort falsch! </label>';
-                $formularBody.= "\n</td>\n</tr>";
-                $formularBody.= "\n<tr><td></td><td><input type='submit' name='login' value='Login'></td></tr>";
+                $formularBody.= "\n\t</td>\n</tr>";
+                $formularBody.= "\n<tr>\n\t<td>\n\t</td>\n\t<td><input type='submit' name='login' value='Login'>\n\t</td>\n</tr>";
 
         }else{
-            // display a action
-                $formularBody = "\n<tr>\n<td>\n\t<label title='aktion' for='aktion'>";
-                $formularBody.= "".$this->Felder['aktion']['lab']."</label>\n</td>\n<td>";
+            // choose a action
+                $formularBody = "\n<tr>\n\t<td>\n\t\t<label title='aktion' for='aktion'>";
+                $formularBody.= "".$this->Felder['aktion']['lab']."</label>\n\t</td>\n\t<td>";
                 $formularBody.= "".$this->formFeldObj('aktion')."";
-                $formularBody.= "\n<input type='submit' name='chng' value='Wechseln'>";
-                $formularBody.= "\n<input type='hidden' name='lastaction' value='" . $this->req['aktion'] . "'>";
-                $formularBody.= "\n</td>";
+                $formularBody.= "\n\t\t<input type='submit' name='chng' value='Wechseln'>";
+                $formularBody.= "\n\t\t<input type='hidden' name='lastaction' value='" . $this->req['aktion'] . "'>";
+                $formularBody.= "\n\t</td>";
                 $formularBody.= "\n</tr>";
-                $formularBody.="\n<tr>\n<th align='left' colspan='2'><h2>";
+            // display a action and fieldrows
+                $formularBody.="\n<tr>\n\t<th align='left' colspan='2'>\n\t\t<h2>";
                 $formularBody.= $this->Aktionen[ $this->req['aktion'] ]['titel'];
-                $formularBody.="</h2>\n</td>\n</tr>";
+                $formularBody.="</h2>\n\t</th>\n</tr>\n";
                 foreach( $felder as $fld){
                     $formularBody.=$this->formFeldRow($fld);
                 }
-                if( !$this->Aktionen[ $this->req['aktion'] ]['autorun'] ) $formularBody.="\n<tr><td></td><td><input type='submit' name='ok' value='Ok'></td></tr>";
+                if( !$this->Aktionen[ $this->req['aktion'] ]['autorun'] ) $formularBody.="<tr>\n\t<td>\n\t</td>\n\t<td><input type='submit' name='ok' value='Ok'>\n\t</td>\n</tr>\n";
 
         }
         $formularEnde = $this->formHidden($this->req['aktion']);
         $formularEnde .= "\n</form>\n";
 
-        return $formularKopf . "\n<table border='0'>" . $formularBody . "\n</table>" . $formularEnde . "\n";
+        return $formularKopf . "\n<table border='0'>" . $formularBody . "\n</table>\n" . $formularEnde . "\n";
     }
     
     /**
@@ -410,7 +483,7 @@ class t3InstallHelper {
                 if( $hf == $noFld[array_search( $hf , $noFld)] )continue;
                 $hid[]="<input type='hidden' name='".$hf."' value='". ( isset($this->req[$hf]) ? $this->req[$hf] : '' ) ."'>";
         }
-        $strHidden = @implode("\n\t",$hid);
+        $strHidden = "\n\t\t".@implode("\n\t\t",$hid);
         return $strHidden;
     }
     
@@ -423,14 +496,14 @@ class t3InstallHelper {
      */
     Private function formFeldRow( $fld ){
         if( $fld == 'pwd' && $this->loginTest() > 0 ){
-            $row = "<tr><td></td><td>".$this->formFeldObj($fld)."</td></tr>";
+            $row = "\n<tr>\n\t<td>\n\t</td>\n\t<td>\n\t\t".$this->formFeldObj($fld)."\n\t</td>\n</tr>";
         }else{
             if(isset($this->Felder[$fld]['lab'])){
                     $lab = "\n\t<label title='".$fld."' for='".$fld."'>".$this->Felder[$fld]['lab']."</label>";
             }else{
                     $lab = "\n\t<label title='".$fld."' for='".$fld."'>".$fld."</label>";
             }
-            $row = "\n<tr>\n<td width='120'>".$lab."\n</td>\n<td>".$this->formFeldObj($fld)."\n</td>\n</tr>";
+            $row = "\n<tr>\n\t<td width='120'>\n\t\t".$lab."\n\t</td>\n\t<td>\n\t\t".$this->formFeldObj($fld)."\n\t</td>\n</tr>";
         }
         return $row;
     }
@@ -451,7 +524,7 @@ class t3InstallHelper {
             if(!isset($this->req[$fld])){if(isset($this->Felder[$fld]['standardwert']) ) $isSel[$this->Felder[$fld]['standardwert'] ]=" selected";}else{$isSel[ $this->req[$fld] ]=" selected";}
             foreach(array_keys($FldListe) as $oNr){ if( isset($FldListe[$oNr]) ) $opts.="\n\t\t<option value='".$oNr."'".( isset($isSel[$oNr]) ? $isSel[$oNr] : '' ).">".$FldListe[$oNr]."</option>";}
             $tiptext = isset($this->Felder[$fld]['tiptext']) ? ' ' . $this->Felder[$fld]['tiptext'] . '' : '' ;
-            return "\n\t<select name='".$fld."' id='".$fld."'>".$opts."\n\t</select>".$tiptext."";
+            return "\n\t\t<select name='".$fld."' id='".$fld."'>".$opts."\n\t\t</select>".$tiptext."";
         break;
         case "password":
            $loggedIn = $this->loginTest();
@@ -460,7 +533,7 @@ class t3InstallHelper {
             }else{
                     $defValue = $loggedIn == 1 ? $this->req[$fld] : ''; // protect from attack by " /> <input value="...
             }
-            $entry = "\n\t";
+            $entry = "\n\t\t";
             if( $loggedIn == 1 ){
                 $entry.= '<input type="hidden" name="'.$fld.'" id="'.$fld.'" value="'.$defValue.'">';
             }else{
@@ -478,7 +551,7 @@ class t3InstallHelper {
         case "text":
         default:
             if(!isset($this->req[$fld])){$defValue = isset($this->Felder[$fld]['standardwert']) ? $this->Felder[$fld]['standardwert'] : '';}else{$defValue = $this->req[$fld];}
-            return "\n\t<input size='50' type='text' name='".$fld."' id='".$fld."' value='".$defValue."'>" . ( isset($this->Felder[$fld]['tiptext']) ? $this->Felder[$fld]['tiptext'] : ''  );
+            return "\n\t\t<input size='50' type='text' name='".$fld."' id='".$fld."' value='".$defValue."'>" . ( isset($this->Felder[$fld]['tiptext']) ? $this->Felder[$fld]['tiptext'] : ''  );
         break;
         }
     }
@@ -579,37 +652,60 @@ class t3InstallHelper {
     }
     
     /**
+     * runActionPreHook
+     *  detect and run an action
+     *
+     * @param string $suffix
+     * @return string with result for debug-purpose
+     */
+    Private function runActionHook( $suffix = 'PreDisplayHook' ){
+            $action = $this->Aktionen[$this->req['aktion']]['script'] . '_' . $suffix;
+            if( method_exists( $this , $action ) ) {
+                $workResult = $this->$action();
+                return $workResult;
+            }
+            return false;
+     }
+    
+    /**
      * runAction
      *  detect and run an action
      *
      * @return string with result for debug-purpose
      */
     Private function runAction(){
+        
+        // run the action if exists and store the result as content
         $content = '';
-        if( $this->loginTest() < 0 ){
-            $content = 'Passwort fehler';
-        }else{
-            $action = $this->Aktionen[$this->req['aktion']]['script'];
-            if( method_exists( $this , $action ) ) {
-                $workResult = $this->$action();
-                if( !isset($workResult) ) {
-                    $content = "Aktion ".$this->Aktionen[$this->req['aktion']]['titel']. ": nicht gelungen ";
-                }else{
-                    $content = "Aktion <i>".$this->Aktionen[$this->req['aktion']]['titel']."</i>".trim(" ".$workResult);
-                }
+        $action = $this->Aktionen[$this->req['aktion']]['script'];
+        if( method_exists( $this , $action ) ) {
+        
+            $workResult = $this->$action();
+            
+            if( !isset($workResult) ) {
+                $content = "<span class=\"attention\">Aktion ".$this->Aktionen[$this->req['aktion']]['titel']. ": nicht gelungen </span>";
             }else{
-                $content = "Aktion [".$this->req['aktion']. "] &raquo;".$this->Aktionen[$this->req['aktion']]['titel']. "&laquo; nicht vorhanden ";
+                if( $this->Aktionen[$this->req['aktion']]['autorun'] ){
+                    $content = trim(" ".$workResult);
+                }else{
+                    $content = "<span class=\"attention\">Aktion <i>".$this->Aktionen[$this->req['aktion']]['titel']."</i></span>".trim(" ".$workResult);
+                }
+                $this->writeConfig();
             }
+            
+        }else{
+            $content = "<span class=\"attention\">Aktion [".$this->req['aktion']. "] &raquo;".$this->Aktionen[$this->req['aktion']]['titel']. "&laquo; nicht vorhanden.</span> ";
         }
         
+        // return wrapped result 
         if($this->req['lastaction'] == $this->req['aktion']  || $this->Aktionen[$this->req['aktion']]['autorun']){
-            $bodyOut = "\n" . "\n" . '<div style="border-top:thin solid #ccc; padding:10px 0 0 0;margin:10px 0 0 0;" >';
+            $bodyOut = "\n\t\t". '<div class="actionAnswer" >';
             $bodyOut .= "\n" . "\n" . $content;
-            $bodyOut .= "\n" . "\n" . '</div>' . "\n";
+            $bodyOut .= "\n\t\t" . '</div>' . "\n";
         }else{
-            $bodyOut = "\n" . "\n" . '<div style="border-top:thin solid #ccc; padding:15px 0 0 0;margin:10px 0 0 0;font-style:italic;" >';
-            $bodyOut .= 'Aktion gewechselt zu: &raquo;' . $this->Aktionen[ $this->req['aktion'] ]['titel'] . '&laquo;';
-            $bodyOut .= "\n" . "\n" . '</div>' . "\n";
+            $bodyOut = "\n\t\t" . '<div class="actionAnswer" style="font-style:italic;" >';
+            $bodyOut .= '<span class=\"attention\">Aktion gewechselt zu: &raquo;' . $this->Aktionen[ $this->req['aktion'] ]['titel'] . '&laquo;</span>';
+            $bodyOut .= "\n\t\t" . '</div>' . "\n";
         }
         
         return $bodyOut;
@@ -640,9 +736,9 @@ class t3InstallHelper {
         
         $op = exec( $command , $aExecResult);
         if(count($aExecResult) > 1){
-            $outText =  ". Antwort: ". count($aExecResult) . " Dateien entpackt nach " . $rootpath . ".";
+            $outText =  " Antwort: ". count($aExecResult) . " Dateien entpackt nach " . $rootpath . ".";
         }else{
-            $outText = ". Keine Aktion, vielleicht aufgrund eines existenten Verzeichnisses? <br />Antwort: [" . ( isset($aExecResult[0]) ? $aExecResult[0] : "0" ) . "]";
+            $outText = " Keine Aktion, vielleicht aufgrund eines existenten Verzeichnisses? <br />Antwort: [" . ( isset($aExecResult[0]) ? $aExecResult[0] : "0" ) . "]";
         }
         
         return  $outText;
@@ -655,11 +751,11 @@ class t3InstallHelper {
      */
     Private function actLink(){
         if( !isset($this->req['linkdatei']) || empty($this->req['linkdatei']) ){
-            return ". Fehler: 'Linkdatei' darf nicht leer sein.";
+            return " Fehler: 'Linkdatei' darf nicht leer sein.";
         }elseif( !isset($this->req['symlink']) || empty($this->req['symlink']) ){
-            return ". Fehler: 'Symlink' darf nicht leer sein.";
+            return " Fehler: 'Symlink' darf nicht leer sein.";
         }elseif( strpos( ' ' . $this->req['symlink'] , '..' ) ){
-            return ". Fehler: 'Symlink' darf nur im aktuellen Pfad oder einem Unterpfad erstellt werden. <br />Symlink Enth&auml;lt &raquo;..&laquo;!";
+            return " Fehler: 'Symlink' darf nur im aktuellen Pfad oder einem Unterpfad erstellt werden. <br />Symlink Enth&auml;lt &raquo;..&laquo;!";
         }
 
         $link = trim( $this->req['symlink'] , '/' );
@@ -700,18 +796,18 @@ class t3InstallHelper {
         $tempBaseDir = '/' . trim( dirname(__FILE__) , '/' ) . '/' ;
         
         if(!file_exists($pathToOrigin) ){
-            return ". Fehler: 'linkdatei' existiert nicht: ".$pathToOrigin;
+            return " Fehler: 'linkdatei' existiert nicht: ".$pathToOrigin;
         }elseif(!file_exists(dirname($tempBaseDir.$link)) ){
-            return ". Fehler: Directory f&uuml;r 'symlink'  existiert nicht: " . dirname($tempBaseDir.$link);
+            return " Fehler: Directory f&uuml;r 'symlink'  existiert nicht: " . dirname($tempBaseDir.$link);
         }elseif( file_exists($tempBaseDir.$link) || is_link($tempBaseDir.$link) ){
-            return ". Fehler: Datei existiert (".filetype($tempBaseDir.$link)."): ".$tempBaseDir.$link."";
+            return " Fehler: Datei existiert (".filetype($tempBaseDir.$link)."): ".$tempBaseDir.$link."";
         }
         
         chdir( dirname($tempBaseDir.$link) );
         symlink( $relatedOrignPath ,  $basenameLink);
         // also possible by exec:
         // exec( 'ln -s ' . $this->req['linkdatei'] . ' ' . $link );
-        return ". ok, gelinkt: ".$tempBaseDir.$link." <br />-> Verweist auf: ".$relatedOrignPath."";
+        return " ok, gelinkt: ".$tempBaseDir.$link." <br />-> Verweist auf: ".$relatedOrignPath."";
     }
     
     /**
@@ -723,20 +819,20 @@ class t3InstallHelper {
         if( isset($this->Felder['symlink']['standardwert']) ) unset($this->Felder['symlink']['standardwert']);
         
         if( !isset($this->req['symlink']) || empty($this->req['symlink']) ){
-            return ". Fehler: 'Symlink' darf nicht leer sein.";
+            return " Fehler: 'Symlink' darf nicht leer sein.";
         }
         
         $link = trim($this->req['symlink'],"/");
         $pathToOrigin = '/' . trim( dirname(__FILE__) , '/' ) . '/';
         if(!file_exists($pathToOrigin.$link) ){
-            return ". Fehler: Symlink '".$pathToOrigin.$link."' <br />existiert nicht.";
+            return " Fehler: Symlink '".$pathToOrigin.$link."' <br />existiert nicht.";
         }elseif(filetype($pathToOrigin.$link) != 'link' ){
-            return ". Fehler, Datei '".$pathToOrigin.$link."' <br />ist kein Link, sondern vom Typ '".filetype($pathToOrigin.$link)."'.";
+            return " Fehler, Datei '".$pathToOrigin.$link."' <br />ist kein Link, sondern vom Typ '".filetype($pathToOrigin.$link)."'.";
         }
         
         unlink($pathToOrigin.$link);
         
-        return ". ok, Link gel&ouml;scht: ".$pathToOrigin.$link;
+        return " ok, Link gel&ouml;scht: ".$pathToOrigin.$link;
     }
     
     /**
@@ -840,6 +936,8 @@ class t3InstallHelper {
     Private function actPreauth(){
         if( !isset($this->req['username']) || empty($this->req['username']) || trim($this->req['username']) == '' ) return '. Kein Benutzername angegeben.';
         if( !isset($this->req['subdomains']) ) return '. Kein Url angegeben.';
+
+        $this->writeConfig();
         
         if( empty( $this->aIngredients['timestamp'] ) ) {
             $this->aIngredients['timestamp'] = ( time() * 1000 );
@@ -861,12 +959,124 @@ class t3InstallHelper {
         }
         
         $timeInfo = 'g&uuml;ltig bis um ' . date( 'H:i' , ( ($this->aIngredients['timestamp']/1000) + 600 ) )  . ' Uhr';
-        $strForm = ':  <p>Links f&uuml;r &laquo;<b>'.$this->req['username'].'</b>&raquo;, '.$timeInfo.'</p>';
+        $strForm = ' <p>Links f&uuml;r &laquo;<b>'.$this->req['username'].'</b>&raquo;, '.$timeInfo.'</p>';
         $subdomains = strpos( $this->req['subdomains'] , ',') ? explode( ',' , $this->req['subdomains'] ) : explode( ' ' , $this->req['subdomains'] ) ;
         foreach( $subdomains as $subdom ) $strForm .= '<a target="_blank" href="' . trim(trim($subdom)) . '/apps/Login.aspx' . $uri . '">' . trim($subdom) . '</a> <br />';
 
         return " " . $strForm;
         
+    }
+    
+    /**
+     * Action actPreauth_beforeDisplayHook
+     *
+     * @return string with result for debug-purpose
+     */
+    Private function actPreauth_beforeDisplayHook(){ 
+            if( $this->req['username'] ) $this->Felder['username']['standardwert'] = $this->req['username'];
+            if( $this->req['subdomains'] ) $this->Felder['subdomains']['standardwert'] = $this->req['subdomains'];
+        // store incomed fields
+        if( isset($this->req['preSecretKey']) && strlen($this->req['preSecretKey']) ){
+                $this->strSecretPreauthKey = $this->req['preSecretKey'];
+        }
+        if( isset($this->req['preSeparer']) && strlen($this->req['preSeparer']) ){
+                $this->strAuthSeparer = $this->req['preSeparer'];
+        }
+        
+        // set default fields
+        $this->Felder['preSeparer']['standardwert'] = $this->strAuthSeparer;
+        $this->Felder['preSecretKey']['standardwert'] = $this->strSecretPreauthKey;
+        $this->Felder['preScoolname']['standardwert'] = $this->aIngredients['school'];
+        $this->Felder['preRolename']['standardwert'] = $this->aIngredients['role'];
+        $this->Felder['preOrderlist']['standardwert'] = implode( ',' , array_keys($this->aIngredients) );
+
+        
+        // store incomed ingredients
+        if( isset($this->req['preOrderlist']) && strlen($this->req['preOrderlist']) ){
+            $this->Felder['preOrderlist']['standardwert'] = $this->req['preOrderlist'];
+        }
+        if( isset($this->req['preScoolname']) && strlen($this->req['preScoolname']) ){
+            $this->aIngredients['school'] = $this->req['preScoolname'];
+        }
+        if( isset($this->req['preRolename']) && strlen($this->req['preRolename']) ){
+            $this->aIngredients['role'] = $this->req['preRolename'];
+        }
+
+        // resort the ingredients list
+        if( isset( $this->Felder['preOrderlist']['standardwert'] ) ){
+                $aSetOrder = [];
+                $aFields = explode( ',' , $this->Felder['preOrderlist']['standardwert'] );
+                if( count($aFields) ){
+                    foreach($aFields as $z => $fieldName ){
+                        $aSetOrder[$fieldName] = isset($this->aIngredients[$fieldName]) ? $this->aIngredients[$fieldName] : '';
+                    }
+                    $this->aIngredients = [];
+                    $this->aIngredients = $aSetOrder;
+                }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Action actPreauthConfig
+     *
+     * @return string with result for debug-purpose
+     */
+    Private function actPreauthConfig(){
+        
+//         $this->writeConfig();
+        $outtext = '<p>OK, die Konfiguration wurde ge&auml;ndert.' ;
+        return $outtext;
+    }
+    
+    /**
+     * Action actPreauthConfigPreDisplayHook
+     *
+     * @return string with result for debug-purpose
+     */
+    Private function actPreauthConfig_beforeDisplayHook(){
+        // store incomed fields
+        if( isset($this->req['preSecretKey']) && strlen($this->req['preSecretKey']) ){
+                $this->strSecretPreauthKey = $this->req['preSecretKey'];
+        }
+        if( isset($this->req['preSeparer']) && strlen($this->req['preSeparer']) ){
+                $this->strAuthSeparer = $this->req['preSeparer'];
+        }
+        
+        // set default fields
+        $this->Felder['preSeparer']['standardwert'] = $this->strAuthSeparer;
+        $this->Felder['preSecretKey']['standardwert'] = $this->strSecretPreauthKey;
+        $this->Felder['preScoolname']['standardwert'] = $this->aIngredients['school'];
+        $this->Felder['preRolename']['standardwert'] = $this->aIngredients['role'];
+        $this->Felder['preOrderlist']['standardwert'] = implode( ',' , array_keys($this->aIngredients) );
+
+        
+        // store incomed ingredients
+        if( isset($this->req['preOrderlist']) && strlen($this->req['preOrderlist']) ){
+            $this->Felder['preOrderlist']['standardwert'] = $this->req['preOrderlist'];
+        }
+        if( isset($this->req['preScoolname']) && strlen($this->req['preScoolname']) ){
+            $this->aIngredients['school'] = $this->req['preScoolname'];
+        }
+        if( isset($this->req['preRolename']) && strlen($this->req['preRolename']) ){
+            $this->aIngredients['role'] = $this->req['preRolename'];
+        }
+
+        // resort the ingredients list
+        if( isset( $this->Felder['preOrderlist']['standardwert'] ) ){
+                $aSetOrder = [];
+                $aFields = explode( ',' , $this->Felder['preOrderlist']['standardwert'] );
+                if( count($aFields) ){
+                    foreach($aFields as $z => $fieldName ){
+                        $aSetOrder[$fieldName] = isset($this->aIngredients[$fieldName]) ? $this->aIngredients[$fieldName] : '';
+                    }
+                    $this->aIngredients = [];
+                    $this->aIngredients = $aSetOrder;
+                }
+        }
+        
+        return true;
     }
     
     /**
@@ -887,10 +1097,18 @@ class t3InstallHelper {
                 
             }elseif( $this->loginTest() ){
                 $this->strDocupassword = $newPasswordHash;
+                if( $newPasswordHash == 'b858cb282617fb0956d960215c8e84d1ccf909c6' ){
+                    $outtext = ' <p>Initialpasswort hergestellt.</p>';
+                    $this->Felder['pwd']['tiptext'] = $this->origConfig['Felder']['pwd']['tiptext'];
+                }else{
+                    $outtext .= '<p>OK, das Passwort wurde ge&auml;ndert.';
+                    $this->Felder['pwd']['tiptext'] = '';
+                }
                 $this->writeConfig();
-                $outtext .= '<p>OK, das Passwort wurde ge&auml;ndert.';
             }
             
+        }else{
+                    $outtext .= '<p>Feld Passwort leer, keine &Auml;nderung.';
         }
 
         
