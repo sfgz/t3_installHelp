@@ -2,12 +2,11 @@
 
 /** 
 * Class t3InstallHelper
+* Built to set up Typo3 installations on hosted servers without ssh-access.
 * 
 * @date      02.03.2020
 * @copyright MIT License 
 * @author    Daniel Rueegg Winterthur CH
-* 
-* Built to set up Typo3 installations on hosted servers without ssh-access.
 *
 **/
 
@@ -230,8 +229,7 @@ class t3InstallHelper {
     
     /**
      * main
-     *   initiate script
-     *   returns string with final HTML code
+     *   start script. returns string with final HTML code
      *
      * @return string
      */
@@ -239,8 +237,6 @@ class t3InstallHelper {
         
         $this->origConfig = [ 'Felder' => $this->Felder , 'aIngredients' =>  $this->aIngredients ];
         
-        $this->runActionHook( 'beforeSetupUpVarialesHook' );
-    
         $this->setUpVariales();
         
         $this->runActionHook( 'beforeDisplayHook' );
@@ -252,17 +248,13 @@ class t3InstallHelper {
 
         // create the input form part of html document
         $bodyOut = $this->htmFormular();
-
         // if ok was clicked then append result from data-Action, wrap it as html div and append to form.
-        if( isset($actionResult) ){
-                $bodyOut .= $actionResult;
-        }
-
+        if( isset($actionResult) ) $bodyOut .= $actionResult;
+        
         // output header , form, runAction()-result and footer
         $htmlOut = $this->wrapAsHtml($bodyOut);
         
         return $htmlOut;
-        
     }
     
     /**
@@ -298,7 +290,6 @@ class t3InstallHelper {
         }else{
             $this->req['lastaction'] = $this->req['aktion'];
         }
-        
         return true;
     }
     
@@ -425,7 +416,7 @@ class t3InstallHelper {
                 $formularBody.= "\n\t</td>\n</tr>";
                 $formularBody.= "\n<tr>\n\t<td>\n\t</td>\n\t<td><input type='submit' name='login' value='Login'>\n\t</td>\n</tr>";
 
-        }else{ // choose a action
+        }else{  // choose a action
                 $formularBody = "\n<tr>\n\t<td>\n\t\t<label title='aktion' for='aktion'>";
                 $formularBody.= "".$this->Felder['aktion']['lab']."</label>\n\t</td>\n\t<td>";
                 $formularBody.= "".$this->formFeldObj('aktion')."";
@@ -433,7 +424,7 @@ class t3InstallHelper {
                 $formularBody.= "\n\t\t<input type='hidden' name='lastaction' value='" . $this->req['aktion'] . "'>";
                 $formularBody.= "\n\t</td>";
                 $formularBody.= "\n</tr>";
-            // display a action and fieldrows
+                // display a action and fieldrows
                 $formularBody.="\n<tr>\n\t<th align='left' colspan='2'>\n\t\t<h2>";
                 $formularBody.= $this->Aktionen[ $this->req['aktion'] ]['titel'];
                 $formularBody.="</h2>\n\t</th>\n</tr>\n";
@@ -783,8 +774,7 @@ class t3InstallHelper {
         
         chdir( dirname($tempBaseDir.$link) );
         symlink( $relatedOrignPath ,  $basenameLink);
-        // also possible by exec:
-        // exec( 'ln -s ' . $this->req['linkdatei'] . ' ' . $link );
+        // also possible by exec: // exec( 'ln -s ' . $this->req['linkdatei'] . ' ' . $link );
         return " ok, gelinkt: ".$tempBaseDir.$link." <br />-> Verweist auf: ".$relatedOrignPath."";
     }
     
@@ -966,8 +956,6 @@ class t3InstallHelper {
         $this->Felder['preSecretKey']['standardwert'] = $this->strSecretPreauthKey;
         $this->Felder['preScoolname']['standardwert'] = $this->aIngredients['school'];
         $this->Felder['preRolename']['standardwert'] = $this->aIngredients['role'];
-        $this->Felder['preOrderlist']['standardwert'] = implode( ',' , array_keys($this->aIngredients) );
-
         
         // store incomed ingredients
         if( isset($this->req['preOrderlist']) && strlen($this->req['preOrderlist']) ){
@@ -991,63 +979,8 @@ class t3InstallHelper {
                     $this->aIngredients = [];
                     $this->aIngredients = $aSetOrder;
                 }
-        }
-        return true;
-    }
-    
-    /**
-     * Action actPreauthConfig
-     *
-     * @return string with result for debug-purpose
-     */
-    Private function actPreauthConfig(){
-        $outtext = '<p>OK, die Konfiguration wurde ge&auml;ndert.' ;
-        return $outtext;
-    }
-    
-    /**
-     * Action actPreauthConfigPreDisplayHook
-     *
-     * @return string with result for debug-purpose
-     */
-    Private function actPreauthConfig_beforeDisplayHook(){
-        // store incomed fields
-        if( isset($this->req['preSecretKey']) && strlen($this->req['preSecretKey']) ){
-                $this->strSecretPreauthKey = $this->req['preSecretKey'];
-        }
-        if( isset($this->req['preSeparer']) && strlen($this->req['preSeparer']) ){
-                $this->strAuthSeparer = $this->req['preSeparer'];
-        }
-        
-        // set default fields
-        $this->Felder['preSeparer']['standardwert'] = $this->strAuthSeparer;
-        $this->Felder['preSecretKey']['standardwert'] = $this->strSecretPreauthKey;
-        $this->Felder['preScoolname']['standardwert'] = $this->aIngredients['school'];
-        $this->Felder['preRolename']['standardwert'] = $this->aIngredients['role'];
-        $this->Felder['preOrderlist']['standardwert'] = implode( ',' , array_keys($this->aIngredients) );
-
-        // store incomed ingredients
-        if( isset($this->req['preOrderlist']) && strlen($this->req['preOrderlist']) ){
-            $this->Felder['preOrderlist']['standardwert'] = $this->req['preOrderlist'];
-        }
-        if( isset($this->req['preScoolname']) && strlen($this->req['preScoolname']) ){
-            $this->aIngredients['school'] = $this->req['preScoolname'];
-        }
-        if( isset($this->req['preRolename']) && strlen($this->req['preRolename']) ){
-            $this->aIngredients['role'] = $this->req['preRolename'];
-        }
-
-        // resort the ingredients list
-        if( isset( $this->Felder['preOrderlist']['standardwert'] ) ){
-                $aSetOrder = [];
-                $aFields = explode( ',' , $this->Felder['preOrderlist']['standardwert'] );
-                if( count($aFields) ){
-                    foreach($aFields as $z => $fieldName ){
-                        $aSetOrder[$fieldName] = isset($this->aIngredients[$fieldName]) ? $this->aIngredients[$fieldName] : '';
-                    }
-                    $this->aIngredients = [];
-                    $this->aIngredients = $aSetOrder;
-                }
+                unset($aSetOrder['preauth']);
+                $this->Felder['preOrderlist']['standardwert'] = implode( ',' , array_keys($aSetOrder) );
         }
         return true;
     }
