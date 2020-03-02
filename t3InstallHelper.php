@@ -353,6 +353,13 @@ class t3InstallHelper {
         $header.= "        .actionAnswer {border-top:thin solid #ccc; padding:10px 0 0 0;margin:10px 0 0 0;}\n";
         $header.= "        .actionAnswer .attention {background:#FF0;padding:3px;margin-right:3px;border-radius:3px;border:thin solid #555;}\n";
         $header.= "        .footerLine {border-top:1px solid #aaa;font-size:80%;padding:10px 0 0 0;margin:15px 0 0 0;font-style:italic;;font-weight:normal;}\n";
+        $header.= "        .linkButton { text-decoration:none; font-weight:normal;font-size:60%; font-family:sans-serif;border-radius:5px;padding:3px 8px;margin:0 5px; 
+                            color:#000;
+                            background:#ddd; 
+                            border:2px solid #000;
+                            border-color:#ddd #bbb #000 #777;
+                            }\n";
+        $header.= "        .linkButton:hover { background:#999; border-color:#000 #777 #ddd #bbb; }\n";
         $header.= "    </style>\n";
         $header.= "  </head>\n";
         
@@ -367,8 +374,8 @@ class t3InstallHelper {
         $body.= '          <span class="pageSlimTitle">v' . $this->strVersion . '</span>' . "\n";
         $body.= '          <span class="pageSmallTitle"> &copy;' . date('Y') . ' MIT Daniel R&uuml;egg</span>' . "\n";
         
-        if( $loginTest > 0 ) {
-                $body.= '          <span class="pageSlimTitle"><a href="'. $URL. '">Logout</a></span>' . "\n";
+        if( $loginTest > 0 ) { // Logout-Buttom
+                $body.= '          <a class="linkButton" href="'. $URL. '">Logout</a>' . "\n";
                 $body.= '          <p class="pageSmallTitle" style="padding:0;margin:5px 0;">' . "\n";
                 $body.= '          Diese Datei';
                 $body.= ' &raquo;' . pathinfo( __FILE__ , PATHINFO_BASENAME). '&laquo;';
@@ -956,6 +963,10 @@ class t3InstallHelper {
         $this->Felder['preSecretKey']['standardwert'] = $this->strSecretPreauthKey;
         $this->Felder['preScoolname']['standardwert'] = $this->aIngredients['school'];
         $this->Felder['preRolename']['standardwert'] = $this->aIngredients['role'];
+
+        $aSetOrder = $this->aIngredients;
+        unset($aSetOrder['preauth']);
+        $this->Felder['preOrderlist']['standardwert'] = implode( ',' , array_keys($aSetOrder) );
         
         // store incomed ingredients
         if( isset($this->req['preOrderlist']) && strlen($this->req['preOrderlist']) ){
@@ -979,8 +990,6 @@ class t3InstallHelper {
                     $this->aIngredients = [];
                     $this->aIngredients = $aSetOrder;
                 }
-                unset($aSetOrder['preauth']);
-                $this->Felder['preOrderlist']['standardwert'] = implode( ',' , array_keys($aSetOrder) );
         }
         return true;
     }
