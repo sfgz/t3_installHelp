@@ -30,10 +30,6 @@ class t3InstallHelper {
     /**
     * Property strDocupassword
     *  essential for successfull login to this tool!
-    *  
-    *  create a new password: 
-    *  use first the command 'sha1 Passwort' to create a new hash.
-    *  Copy it and and paste the created hash here.
     *
     * @var string
     */
@@ -49,8 +45,7 @@ class t3InstallHelper {
 
     /**
     * Property strAuthSeparer
-    *  essential for successfull preauthLogin!
-    *  empty or a single char Like - _ / | , ;
+    *  essential for successfull preauthLogin! Empty or a single char Like - _ / | , ;
     *
     * @var string
     */
@@ -194,15 +189,6 @@ class t3InstallHelper {
         'f'=>[ 'titel'=>'Dateiliste',             'felder'=>'pwd,fileinfotext',        'script' => 'actFileInfo' ,   'autorun' => 1 ] , 
     ];
 
-/*
-        'c'=>[ 
-                'titel'=>'Preauth Links konfigurieren',         
-                'felder'=>'pwd,preSecretKey,spacer,preHint,preOrderlist,preScoolname,preRolename,preSeparer',
-                'script' => 'actPreauthConfig' , 
-                'autorun' => 0
-        ] ,
-*/
-
     /**
     * Property mim
     *
@@ -328,11 +314,9 @@ class t3InstallHelper {
         $strDocument .= "\n## preauth secret ingredients\n";
         $strDocument .= '$this->strSecretPreauthKey = ' . "'" . $this->strSecretPreauthKey . "';\n";
         $strDocument .= '$this->strAuthSeparer = ' . "'" . $this->strAuthSeparer . "';\n";
-//         $strDocument .= '$this->backlink = ' . "'" . $this->backlink . "';\n";
         
         $strDocument .= '$this->aIngredients = [];' . "\n";
         foreach( $this->aIngredients as $fieldname => $content ){
-//             if( $this->origConfig['aIngredients'][$fieldname] == $content ) continue;
             $strDocument .= '$this->aIngredients'."['" . $fieldname . "'] = '" . ( $fieldname=='timestamp' || $fieldname =='preauth' ? '' : $content ) . "';\n";
         }
         
@@ -434,16 +418,14 @@ class t3InstallHelper {
         $formularKopf = "\n<form action='".$URL."' id='".$this->Form['name']."' name='".$this->Form['name']."' enctype='multipart/form-data' method='post' enctype='multipart/form-data' method='post' accept-charset='".$this->Form['charset']."'> \n";
 
         $isLoggedIn = $this->loginTest();
-        if( $isLoggedIn <= 0 ){
-            // display login formular
+        if( $isLoggedIn <= 0 ){ // display login formular
                 $formularBody = $this->formFeldRow('pwd');
                 $formularBody .= "\n<tr>\n<td colspan='2'>";
                 if( $isLoggedIn < 0 && !isset($_POST['ok']) ) $formularBody.= '<label for="pwd">Passwort falsch! </label>';
                 $formularBody.= "\n\t</td>\n</tr>";
                 $formularBody.= "\n<tr>\n\t<td>\n\t</td>\n\t<td><input type='submit' name='login' value='Login'>\n\t</td>\n</tr>";
 
-        }else{
-            // choose a action
+        }else{ // choose a action
                 $formularBody = "\n<tr>\n\t<td>\n\t\t<label title='aktion' for='aktion'>";
                 $formularBody.= "".$this->Felder['aktion']['lab']."</label>\n\t</td>\n\t<td>";
                 $formularBody.= "".$this->formFeldObj('aktion')."";
@@ -459,7 +441,6 @@ class t3InstallHelper {
                     $formularBody.=$this->formFeldRow($fld);
                 }
                 if( !$this->Aktionen[ $this->req['aktion'] ]['autorun'] ) $formularBody.="<tr>\n\t<td>\n\t</td>\n\t<td><input type='submit' name='ok' value='Ok'>\n\t</td>\n</tr>\n";
-
         }
         $formularEnde = $this->formHidden($this->req['aktion']);
         $formularEnde .= "\n</form>\n";
@@ -645,7 +626,6 @@ class t3InstallHelper {
      * @return int
      */
     Private function loginTest(){
-//         if( 'da39a3ee5e6b4b0d3255bfef95601890afd80709' == $this->strDocupassword ) return 1;
         if( !isset($this->req['pwd']) ) return 0;
         if( $this->req['pwd'] && sha1($this->req['pwd']) == $this->strDocupassword ) return 1;
         return -1;
@@ -707,7 +687,6 @@ class t3InstallHelper {
             $bodyOut .= '<span class=\"attention\">Aktion gewechselt zu: &raquo;' . $this->Aktionen[ $this->req['aktion'] ]['titel'] . '&laquo;</span>';
             $bodyOut .= "\n\t\t" . '</div>' . "\n";
         }
-        
         return $bodyOut;
     }
     
@@ -740,7 +719,6 @@ class t3InstallHelper {
         }else{
             $outText = " Keine Aktion, vielleicht aufgrund eines existenten Verzeichnisses? <br />Antwort: [" . ( isset($aExecResult[0]) ? $aExecResult[0] : "0" ) . "]";
         }
-        
         return  $outText;
     }
     
@@ -1014,7 +992,6 @@ class t3InstallHelper {
                     $this->aIngredients = $aSetOrder;
                 }
         }
-        
         return true;
     }
     
@@ -1024,8 +1001,6 @@ class t3InstallHelper {
      * @return string with result for debug-purpose
      */
     Private function actPreauthConfig(){
-        
-//         $this->writeConfig();
         $outtext = '<p>OK, die Konfiguration wurde ge&auml;ndert.' ;
         return $outtext;
     }
@@ -1051,7 +1026,6 @@ class t3InstallHelper {
         $this->Felder['preRolename']['standardwert'] = $this->aIngredients['role'];
         $this->Felder['preOrderlist']['standardwert'] = implode( ',' , array_keys($this->aIngredients) );
 
-        
         // store incomed ingredients
         if( isset($this->req['preOrderlist']) && strlen($this->req['preOrderlist']) ){
             $this->Felder['preOrderlist']['standardwert'] = $this->req['preOrderlist'];
@@ -1075,7 +1049,6 @@ class t3InstallHelper {
                     $this->aIngredients = $aSetOrder;
                 }
         }
-        
         return true;
     }
     
@@ -1110,8 +1083,6 @@ class t3InstallHelper {
         }else{
                     $outtext .= '<p>Feld Passwort leer, keine &Auml;nderung.';
         }
-
-        
         return "\n" . $outtext . "\n";
     }
     
