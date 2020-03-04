@@ -2,7 +2,7 @@
 
 /** 
 * Class t3InstallHelper
-* Built to set up Typo3 installations on hosted servers without ssh-access.
+* Built to set up Typo3 installations without ssh-access as it happens on hosted servers.
 * 
 * @date      02.03.2020
 * @copyright MIT License 
