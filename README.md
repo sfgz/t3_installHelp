@@ -6,6 +6,7 @@ Zur Installation von Typo3 Anwendungen ohne SSH Zugriff - wie es auf gehosteten 
 
 ## Installation
 Script in ein erreichbares www Verzeichnis kopieren und starten. Passwort ändern!
+
 Copy Script in a reachable www-directory and start it. Change Password!
 
 ## config Datei
