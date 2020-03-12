@@ -10,8 +10,6 @@ Script in ein erreichbares www Verzeichnis kopieren und starten. Passwort änder
 Copy Script in a reachable www-directory and start it. Change Password!
 
 ## config Datei
-Die Datei t3InstallHelper_config.php wird automatisch erstellt, wenn eine Aktion ausgeführt wird. Es eenthält u.a. auch das Passwort.
+Die Datei t3InstallHelper_config.php wird automatisch erstellt, wenn eine Aktion ausgeführt wird. Es eenthält u.a. auch das Passwort. Konfigurationsdateien können beispielsweise unter https://1password.com gespeichert werden.
 
-Konfigurationsdateien können beispielsweise unter https://1password.com gespeichert werden.
-
-The Script creates automatically the configuration-file t3InstallHelper_config.php. It contains the Password. This File on can easy be stored on a platform like https://1password.com .
+The Script creates automatically the configuration-file t3InstallHelper_config.php. It contains the Password. This File can easy be stored on a platform like https://1password.com .
