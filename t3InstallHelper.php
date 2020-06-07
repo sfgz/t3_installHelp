@@ -2,7 +2,7 @@
 
 /** 
 * Class t3InstallHelper
-* Built to set up Typo3 installations without ssh-access as it happens on hosted servers.
+* Built to set up Typo3 installations on hosted servers without ssh-access.
 * 
 * @date      02.03.2020
 * @copyright MIT License 
@@ -17,7 +17,7 @@ class t3InstallHelper {
     *
     * @var string
     */
-    Public $strVersion = '2.18';
+    Public $strVersion = '2.20';
 
     /**
     * Property backlink
@@ -74,103 +74,110 @@ class t3InstallHelper {
                         'typ'          => 'select' ,   
                         'lab'          => 'Aktion' ,            
                         'listen'       => 'aktList' , 
-                        'standardwert' => 'p'
+                        'standardwert' => 'a',
                         ],
         'subdomains'=> [
                         'typ'          => 'text' ,   
-                        'lab'          => 'Dom&auml;nenliste',  
+                        'lab'          => 'Subdom&auml;nen',  
                         'tiptext'      => ' URLs mit Preauth.' ,   
-                        'standardwert' => 'https://subdomain.mydomain.ch'
+                        'style'        => 'width:550px;background:#ddd;',
+                        'standardwert' => 'https://subdomain.mydomain.ch',
                         ],
         'linkdatei' => [
                         'typ'          => 'text' ,     
                         'lab'          => 'Linkdatei' ,         
                         'tiptext'      => '1. ../t3Sources/typo3_src-9.5.5 |
                                           2. typo3_src/typo3 | 3. typo3_src/index.php' , 
-                        'standardwert' => '../t3Sources/typo3_src-9.5.5'
+                        'standardwert' => '../t3Sources/typo3_src-9.5.5',
                         ],
         'symlink'   => [
                         'typ'          => 'text' , 
                         'lab'          => 'Symlink' ,           
                         'tiptext'      => '1. typo3_src | 2. typo3 | 3. index.php' ,  
-                        'standardwert' => 'typo3_src'           
+                        'standardwert' => 'typo3_src' ,         
                         ],
         'original'  => [
                         'typ'    => 'select' ,   
                         'lab'    => 'Original-Datei' ,    
-                        'listen' => 'fileList'
+                        'listen' => 'fileList',
                         ],
         'subpfad'   => [
                         'typ'    => 'select' , 
                         'lab'    => 'zu Verzeichnis' ,    
-                        'listen' => 'subDirList'
+                        'listen' => 'subDirList',
                         ],
         'username'  => [
                         'typ'          => 'text' ,     
                         'lab'          => 'Benutzername',       
                         'tiptext'      => ' eigener Vor- und Nachname',    
-                        'standardwert' => 'vorname.nachname'
+                        'style'        => 'width:150px;',
+                        'standardwert' => 'vorname.nachname',
                         ],
         'passwort'  => [
                         'typ'     => 'text' ,     
                         'lab'     => 'neues Passwort',     
-                        'tiptext' => ' wird&nbsp;verschl&uuml;sselt&nbsp;'
+                        'tiptext' => ' wird&nbsp;verschl&uuml;sselt&nbsp;',
                         ],
         'pwd'       => [
                         'typ'     => 'password' , 
                         'lab'     => 'Passwort',
-                        'tiptext' => ' Das Initialpassord ist ein Leerschlag'
+                        'tiptext' => ' Das Initialpassord ist ein Leerschlag',
                         ],
         'fileinfotext'    => [
                         'typ'   =>'label' , 
                         'lab'   => 'Hinweis' , 
                         'text'  => 'Zeigt alle Dateien im aktuellen Pfad und Aktionen, 
-                                    die mit t3InstallHelp ausgef&uuml;hrt werden k&ouml;nnen.'
+                                    die mit t3InstallHelp ausgef&uuml;hrt werden k&ouml;nnen.',
                         ],
         'passinfo'    => [
                         'typ'  => 'label' , 
                         'lab'  => '' , 
-                        'text' => ''
+                        'text' => '',
                         ],
         'preHint' => [
                         'typ'  => 'label' , 
                         'lab'  => 'Reihenfolge' , 
-                        'text' => 'Die 4 Felder school, role, timestamp und account in richtiger Reihenfolge speichern.'
+                        'text' => 'Die 4 Felder school, role, timestamp und account in richtiger Reihenfolge speichern.',
                         ],
         'spacer' => [
                         'typ'  => 'label' , 
                         'lab'  => '' ,
-                        'text' => '<hr>'
+                        'text' => '<hr>',
                         ],
         'preSeparer' => [
                         'typ'  => 'text' , 
                         'lab'  => 'Trennzeichen' , 
+                        'style'        => 'background:#ddd;',
                         'standardwert' => '-',
-                        'tiptext' => ' Mit diesem Zeichen werden die Parameter verbunden.'
+                        'tiptext' => ' Mit diesem Zeichen werden die Parameter verbunden.',
                         ],
         'preSecretKey' => [
                         'typ'  => 'text' , 
                         'lab'  => 'Secret Key' , 
+                        'style'        => 'background:#ddd;',
                         'standardwert' => 'abcd1234',
-                        'tiptext' => ' Der geheime Schluessel von Intranet Sek II..'
+                        'tiptext' => ' Der geheime Schluessel von Intranet Sek II..',
                         ],
         'preOrderlist' => [
                         'typ'  => 'text' , 
                         'lab'  => 'Reihenfolge' , 
+                        'style'        => 'background:#ddd;',
                         'standardwert' => 'school,role,timestamp,account ',
-                        'tiptext' => ' school, role, timestamp und account.'
+                        'tiptext' => ' school, role, timestamp und account.',
                         ],
         'preScoolname' => [
                         'typ'  => 'text' , 
                         'lab'  => 'school' , 
+                        'style'        => 'background:#ddd;',
                         'standardwert' => 'zB. myScl',
-                        'tiptext' => ''
+                        'tiptext' => '',
                         ],
         'preRolename' => [
                         'typ'  => 'text' , 
                         'lab'  => 'role' , 
+                        'style'        => 'background:#ddd;',
                         'standardwert' => 'student',
-                        'tiptext' => ''
+                        'tiptext' => '',
                         ],
     ];
 
@@ -180,12 +187,14 @@ class t3InstallHelper {
     * @var array
     */
     Private $Aktionen = [
-        'u'=>[ 'titel'=>'Typo3-Datei entpacken',  'felder'=>'pwd,original,subpfad',    'script' => 'actUnzip' ,      'autorun' => 0 ] , 
-        'l'=>[ 'titel'=>'Symlink erstellen',      'felder'=>'pwd,linkdatei,symlink',   'script' => 'actLink' ,       'autorun' => 0 ] ,
-        'd'=>[ 'titel'=>'Symlink l&ouml;schen',   'felder'=>'pwd,symlink',             'script' => 'actDeletelink' , 'autorun' => 0 ] , 
-        'a'=>[ 'titel'=>'Preauth Links anzeigen', 'felder'=>'pwd,username,subdomains,preSecretKey,preHint,preOrderlist,preScoolname,preRolename,preSeparer', 'script' => 'actPreauth' ,    'autorun' => 0 ] ,
+// Original actions without 'c':
+//         'f'=>[ 'titel'=>'Dateiliste',             'felder'=>'pwd,fileinfotext',        'script' => 'actFileInfo' ,   'autorun' => 1 ] , 
+//         'u'=>[ 'titel'=>'Typo3-Datei entpacken',  'felder'=>'pwd,original,subpfad',    'script' => 'actUnzip' ,      'autorun' => 0 ] , 
+//         'l'=>[ 'titel'=>'Symlink erstellen',      'felder'=>'pwd,linkdatei,symlink',   'script' => 'actLink' ,       'autorun' => 0 ] ,
+//         'd'=>[ 'titel'=>'Symlink l&ouml;schen',   'felder'=>'pwd,symlink',             'script' => 'actDeletelink' , 'autorun' => 0 ] , 
+        'a'=>[ 'titel'=>'Preauth Links anzeigen', 'felder'=>'pwd,username,subdomains', 'script' => 'actPreauth' ,    'autorun' => 0 ] ,
+        'c'=>[ 'titel'=>'Preauth Links konfigurieren', 'felder'=>'pwd,preSecretKey,preHint,preOrderlist,preScoolname,preRolename,preSeparer', 'script' => 'actPreauth' ,    'autorun' => 0 ] ,
         'p'=>[ 'titel'=>'Passwort &auml;ndern',   'felder'=>'pwd,passwort,passinfo',   'script' => 'actPassword' ,   'autorun' => 0 ] ,
-        'f'=>[ 'titel'=>'Dateiliste',             'felder'=>'pwd,fileinfotext',        'script' => 'actFileInfo' ,   'autorun' => 1 ] , 
     ];
 
     /**
@@ -427,7 +436,7 @@ class t3InstallHelper {
                 $formularBody = "\n<tr>\n\t<td>\n\t\t<label title='aktion' for='aktion'>";
                 $formularBody.= "".$this->Felder['aktion']['lab']."</label>\n\t</td>\n\t<td>";
                 $formularBody.= "".$this->formFeldObj('aktion')."";
-                $formularBody.= "\n\t\t<input type='submit' name='chng' value='Wechseln'>";
+                if( $this->Felder['aktion']['typ'] == 'select' ) $formularBody.= "\n\t\t<input type='submit' name='chng' value='Wechseln'>";
                 $formularBody.= "\n\t\t<input type='hidden' name='lastaction' value='" . $this->req['aktion'] . "'>";
                 $formularBody.= "\n\t</td>";
                 $formularBody.= "\n</tr>";
@@ -496,6 +505,7 @@ class t3InstallHelper {
      */
     Private function formFeldObj( $fld ){
         $opts = '';
+        $style = isset($this->Felder[$fld]['style']) && !empty($this->Felder[$fld]['style']) ? ' style="' . $this->Felder[$fld]['style'] . '"' : '' ;
         switch($this->Felder[$fld]['typ']){
         case "select":
             $FldListe= $this->formFeldListCnt($this->Felder[$fld]['listen']);
@@ -503,7 +513,22 @@ class t3InstallHelper {
             if(!isset($this->req[$fld])){if(isset($this->Felder[$fld]['standardwert']) ) $isSel[$this->Felder[$fld]['standardwert'] ]=" selected";}else{$isSel[ $this->req[$fld] ]=" selected";}
             foreach(array_keys($FldListe) as $oNr){ if( isset($FldListe[$oNr]) ) $opts.="\n\t\t<option value='".$oNr."'".( isset($isSel[$oNr]) ? $isSel[$oNr] : '' ).">".$FldListe[$oNr]."</option>";}
             $tiptext = isset($this->Felder[$fld]['tiptext']) ? ' ' . $this->Felder[$fld]['tiptext'] . '' : '' ;
-            return "\n\t\t<select name='".$fld."' id='".$fld."'>".$opts."\n\t\t</select>".$tiptext."";
+            return "\n\t\t<select name='".$fld."'" . $style . " id='".$fld."'>".$opts."\n\t\t</select>".$tiptext."";
+        break;
+        case "linklist":
+            // For actions, but disabled. Unshure method because it sends clear pwd in url!
+            $FldListe= $this->formFeldListCnt($this->Felder[$fld]['listen']);
+            if(!is_array($FldListe)) return $this->Pfade['original'];
+            if(!isset($this->req[$fld])){if(isset($this->Felder[$fld]['standardwert']) ) $isSel[$this->Felder[$fld]['standardwert'] ]=" selected";}else{$isSel[ $this->req[$fld] ]=" selected";}
+            foreach(array_keys($FldListe) as $oNr){
+                if( !isset($FldListe[$oNr]) ) continue;
+                if( $oNr == $this->req['aktion'] ){ 
+                    $opts.="\n\t\t <li><b><a href='?aktion=" . $oNr . "&amp;pwd=" . $this->req['pwd'] . "'>" . $FldListe[$oNr] . "</a></b></li>";
+                }else{
+                    $opts.="\n\t\t <li><a href='?aktion=" . $oNr . "&amp;pwd=" . $this->req['pwd'] . "'>" . $FldListe[$oNr] . "</a></li>";
+                }
+            }
+            return '<ul style="list-style-type:none;padding-left:2px;">' . $opts . '</ul>';
         break;
         case "password":
            $loggedIn = $this->loginTest();
@@ -516,7 +541,7 @@ class t3InstallHelper {
             if( $loggedIn == 1 ){
                 $entry.= '<input type="hidden" name="'.$fld.'" id="'.$fld.'" value="'.$defValue.'">';
             }else{
-                $entry.= '<input size="40" type="text" title="'.$defValue.'" name="'.$fld.'" id="'.$fld.'" value="">';
+                $entry.= '<input size="40"' . $style . ' type="text" title="'.$defValue.'" name="'.$fld.'" id="'.$fld.'" value="">';
                 $entry.= isset($this->Felder[$fld]['tiptext']) ? $this->Felder[$fld]['tiptext'] : '' ;
             }
             
@@ -530,7 +555,7 @@ class t3InstallHelper {
         case "text":
         default:
             if(!isset($this->req[$fld])){$defValue = isset($this->Felder[$fld]['standardwert']) ? $this->Felder[$fld]['standardwert'] : '';}else{$defValue = $this->req[$fld];}
-            return "\n\t\t<input size='50' type='text' name='".$fld."' id='".$fld."' value='".$defValue."'>" . ( isset($this->Felder[$fld]['tiptext']) ? $this->Felder[$fld]['tiptext'] : ''  );
+            return "\n\t\t<input size='50'" . $style . " type='text' name='".$fld."' id='".$fld."' value='".$defValue."'>" . ( isset($this->Felder[$fld]['tiptext']) ? $this->Felder[$fld]['tiptext'] : ''  );
         break;
         }
     }
@@ -914,6 +939,13 @@ class t3InstallHelper {
 
         $this->writeConfig();
         
+        // config saved. Return a message if in config- mode.
+        if( $this->req['aktion'] == 'c' ) {
+                return ' OK, gespeichert.';
+        }
+        // ...  Otherwise create links
+        
+        // sanitize time
         if( empty( $this->aIngredients['timestamp'] ) ) {
             $this->aIngredients['timestamp'] = ( time() * 1000 );
         }
