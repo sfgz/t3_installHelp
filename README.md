@@ -1,4 +1,4 @@
-# t3_installHelp 2.18
+# t3_installHelp 2.20
 Zur Installation von Typo3 Anwendungen ohne SSH Zugriff - wie es auf gehosteten Servern vorkommt. FTP-Zugriff ist nötig.
 
 Standalone app to unpack and link typo3 Files.
