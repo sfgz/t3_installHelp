@@ -78,7 +78,7 @@ class t3InstallHelper {
                         ],
         'subdomains'=> [
                         'typ'          => 'text' ,   
-                        'lab'          => 'Subdom&auml;nen',  
+                        'lab'          => 'Dom&auml;nenliste',  
                         'tiptext'      => ' URLs mit Preauth.' ,   
                         'style'        => 'width:550px;background:#ddd;',
                         'standardwert' => 'https://subdomain.mydomain.ch',
@@ -112,6 +112,7 @@ class t3InstallHelper {
                         'tiptext'      => ' eigener Vor- und Nachname',    
                         'style'        => 'width:150px;',
                         'standardwert' => 'vorname.nachname',
+                        'nostore'      => true,
                         ],
         'passwort'  => [
                         'typ'     => 'text' ,     
@@ -191,7 +192,7 @@ class t3InstallHelper {
 //         'f'=>[ 'titel'=>'Dateiliste',             'felder'=>'pwd,fileinfotext',        'script' => 'actFileInfo' ,   'autorun' => 1 ] , 
 //         'u'=>[ 'titel'=>'Typo3-Datei entpacken',  'felder'=>'pwd,original,subpfad',    'script' => 'actUnzip' ,      'autorun' => 0 ] , 
 //         'l'=>[ 'titel'=>'Symlink erstellen',      'felder'=>'pwd,linkdatei,symlink',   'script' => 'actLink' ,       'autorun' => 0 ] ,
-//         'd'=>[ 'titel'=>'Symlink l&ouml;schen',   'felder'=>'pwd,symlink',             'script' => 'actDeletelink' , 'autorun' => 0 ] , 
+//        'd'=>[ 'titel'=>'Symlink l&ouml;schen',   'felder'=>'pwd,symlink',             'script' => 'actDeletelink' , 'autorun' => 0 ] , 
         'a'=>[ 'titel'=>'Preauth Links anzeigen', 'felder'=>'pwd,username,subdomains', 'script' => 'actPreauth' ,    'autorun' => 0 ] ,
         'c'=>[ 'titel'=>'Preauth Links konfigurieren', 'felder'=>'pwd,preSecretKey,preHint,preOrderlist,preScoolname,preRolename,preSeparer', 'script' => 'actPreauth' ,    'autorun' => 0 ] ,
         'p'=>[ 'titel'=>'Passwort &auml;ndern',   'felder'=>'pwd,passwort,passinfo',   'script' => 'actPassword' ,   'autorun' => 0 ] ,
@@ -324,6 +325,7 @@ class t3InstallHelper {
         
         $aFieldsToStore = explode( ',' , 'username,subdomains,aktion' );
         foreach( $aFieldsToStore as $fieldname ){ 
+            if( $this->Felder[$fieldname]['nostore'] ) continue;
             if( !isset($this->Felder[$fieldname]['standardwert']) || $this->origConfig['Felder'][$fieldname]['standardwert'] == $this->Felder[$fieldname]['standardwert'] ) continue;
             $strDocument .= '$this->Felder'."['" . $fieldname . "']['standardwert'] = '" . $this->Felder[$fieldname]['standardwert'] . "';\n";
         }
@@ -436,7 +438,7 @@ class t3InstallHelper {
                 $formularBody = "\n<tr>\n\t<td>\n\t\t<label title='aktion' for='aktion'>";
                 $formularBody.= "".$this->Felder['aktion']['lab']."</label>\n\t</td>\n\t<td>";
                 $formularBody.= "".$this->formFeldObj('aktion')."";
-                if( $this->Felder['aktion']['typ'] == 'select' ) $formularBody.= "\n\t\t<input type='submit' name='chng' value='Wechseln'>";
+                $formularBody.= "\n\t\t<input type='submit' name='chng' value='Wechseln'>";
                 $formularBody.= "\n\t\t<input type='hidden' name='lastaction' value='" . $this->req['aktion'] . "'>";
                 $formularBody.= "\n\t</td>";
                 $formularBody.= "\n</tr>";
@@ -515,21 +517,6 @@ class t3InstallHelper {
             $tiptext = isset($this->Felder[$fld]['tiptext']) ? ' ' . $this->Felder[$fld]['tiptext'] . '' : '' ;
             return "\n\t\t<select name='".$fld."'" . $style . " id='".$fld."'>".$opts."\n\t\t</select>".$tiptext."";
         break;
-        case "linklist":
-            // For actions, but disabled. Unshure method because it sends clear pwd in url!
-            $FldListe= $this->formFeldListCnt($this->Felder[$fld]['listen']);
-            if(!is_array($FldListe)) return $this->Pfade['original'];
-            if(!isset($this->req[$fld])){if(isset($this->Felder[$fld]['standardwert']) ) $isSel[$this->Felder[$fld]['standardwert'] ]=" selected";}else{$isSel[ $this->req[$fld] ]=" selected";}
-            foreach(array_keys($FldListe) as $oNr){
-                if( !isset($FldListe[$oNr]) ) continue;
-                if( $oNr == $this->req['aktion'] ){ 
-                    $opts.="\n\t\t <li><b><a href='?aktion=" . $oNr . "&amp;pwd=" . $this->req['pwd'] . "'>" . $FldListe[$oNr] . "</a></b></li>";
-                }else{
-                    $opts.="\n\t\t <li><a href='?aktion=" . $oNr . "&amp;pwd=" . $this->req['pwd'] . "'>" . $FldListe[$oNr] . "</a></li>";
-                }
-            }
-            return '<ul style="list-style-type:none;padding-left:2px;">' . $opts . '</ul>';
-        break;
         case "password":
            $loggedIn = $this->loginTest();
             if(!isset($this->req[$fld])){
@@ -551,6 +538,10 @@ class t3InstallHelper {
             $entry = isset($this->Felder[$fld]['text']) ? $this->Felder[$fld]['text'] : '';
             $entry.= isset($this->Felder[$fld]['tiptext']) ? $this->Felder[$fld]['tiptext'] : '' ;
             return $entry;
+        break;
+        case "fixtext":
+            if(!isset($this->req[$fld])){$defValue = isset($this->Felder[$fld]['standardwert']) ? $this->Felder[$fld]['standardwert'] : '';}else{$defValue = $this->req[$fld];}
+            return "\n\t\t<input disabled='disabled' size='50'" . $style . " type='text' name='".$fld."' id='".$fld."' value='".$defValue."'>" . ( isset($this->Felder[$fld]['tiptext']) ? $this->Felder[$fld]['tiptext'] : ''  );
         break;
         case "text":
         default:
